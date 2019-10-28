@@ -76,7 +76,7 @@ private:
 };
 
 TriangleWindow::TriangleWindow()
-    : m_program(0)
+    : m_program(nullptr)
     , m_frame(0)
 {
 }

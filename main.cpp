@@ -50,10 +50,14 @@
 
 #include "openglwindow.h"
 
-#include <QtGui/QGuiApplication>
 #include <QtGui/QMatrix4x4>
 #include <QtGui/QOpenGLShaderProgram>
 #include <QtGui/QScreen>
+
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QMainWindow>
+#include <QtWidgets/QDockWidget>
+#include <QtWebEngineWidgets/QWebEngineView>
 
 #include <QtCore/qmath.h>
 
@@ -85,17 +89,33 @@ TriangleWindow::TriangleWindow()
 //! [2]
 int main(int argc, char **argv)
 {
-    QGuiApplication app(argc, argv);
+    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    QApplication app(argc, argv);
 
     QSurfaceFormat format;
     format.setSamples(16);
 
-    TriangleWindow window;
-    window.setFormat(format);
-    window.resize(640, 480);
-    window.show();
+    TriangleWindow* window = new TriangleWindow();
+    window->setFormat(format);
+    window->setAnimating(true);
 
-    window.setAnimating(true);
+    QMainWindow mw;
+
+    QDockWidget* webDockWidget = new QDockWidget("Web View");
+    QWebEngineView* webView = new QWebEngineView(&mw);
+    webDockWidget->setWidget(webView);
+    webView->load(QUrl("http://www.example.com/"));
+
+    QWidget* triangleWidget = QWidget::createWindowContainer(window, &mw);
+    mw.setCentralWidget(triangleWidget);
+    mw.setDockOptions(QMainWindow::ForceTabbedDocks | QMainWindow::VerticalTabs);
+    mw.addDockWidget(Qt::LeftDockWidgetArea, webDockWidget);
+    webDockWidget->setAllowedAreas(Qt::AllDockWidgetAreas);
+    webDockWidget->setFloating(true);
+
+    mw.resize(640, 480);
+    mw.show();
+    webDockWidget->show();
 
     return app.exec();
 }
